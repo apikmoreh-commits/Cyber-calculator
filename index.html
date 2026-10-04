@@ -1,0 +1,1098 @@
+```html
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBERCALC 3000 // QUANTUM CORE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            cyan: '#00f3ff',
+                            magenta: '#ff0055',
+                            purple: '#8000ff',
+                            green: '#00ff66',
+                            gold: '#ffb700',
+                            dark: '#030712',
+                            panel: 'rgba(10, 15, 30, 0.75)'
+                        }
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        rajdhani: ['Rajdhani', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Neon Glow Utilities */
+        :root {
+            --primary-glow: #00f3ff;
+            --secondary-glow: #ff0055;
+            --accent-glow: #8000ff;
+            --bg-base: #030712;
+        }
+
+        .theme-synthwave {
+            --primary-glow: #ff0055;
+            --secondary-glow: #00f3ff;
+            --accent-glow: #ff00ff;
+        }
+
+        .theme-matrix {
+            --primary-glow: #00ff66;
+            --secondary-glow: #003311;
+            --accent-glow: #33ff00;
+        }
+
+        .theme-quantum {
+            --primary-glow: #ffb700;
+            --secondary-glow: #ff5500;
+            --accent-glow: #00f3ff;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: #e2e8f0;
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .neon-border {
+            border: 1px solid var(--primary-glow);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2), inset 0 0 15px rgba(0, 243, 255, 0.1);
+        }
+
+        .neon-text-primary {
+            color: var(--primary-glow);
+            text-shadow: 0 0 8px var(--primary-glow);
+        }
+
+        .neon-text-secondary {
+            color: var(--secondary-glow);
+            text-shadow: 0 0 8px var(--secondary-glow);
+        }
+
+        .btn-sci-fi {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            transition: all 0.15s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-sci-fi::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.4s;
+        }
+
+        .btn-sci-fi:hover::before {
+            left: 100%;
+        }
+
+        .btn-sci-fi:hover {
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 12px var(--primary-glow);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .btn-sci-fi:active {
+            transform: translateY(1px);
+            box-shadow: 0 0 5px var(--primary-glow);
+        }
+
+        .glass-panel {
+            background: rgba(8, 12, 24, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+        }
+
+        /* Custom Scrollbar for Sci-fi feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(5, 10, 20, 0.8);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-glow);
+            border-radius: 3px;
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        /* Scanline Overlay Effect */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.25) 50%
+            );
+            background-size: 100% 4px;
+            z-index: 40;
+            opacity: 0.4;
+        }
+
+        .hud-corner-tl {
+            clip-path: polygon(0 0, 100% 0, 100% 20%, 20% 100%, 0 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between items-center relative p-2 sm:p-4 select-none">
+
+    <!-- Scanline effect overlay -->
+    <div class="scanlines"></div>
+
+    <!-- Background Animated Canvas -->
+    <canvas id="bg-canvas" class="fixed top-0 left-0 w-full h-full pointer-events-none z-0"></canvas>
+
+    <!-- Top HUD Bar -->
+    <header class="w-full max-w-6xl z-10 glass-panel rounded-xl p-3 mb-4 flex flex-wrap justify-between items-center gap-4">
+        <div class="flex items-center space-x-3">
+            <div class="w-3 h-8 bg-cyan-400 rounded-sm animate-pulse shadow-[0_0_10px_#00f3ff]"></div>
+            <div>
+                <h1 class="font-orbitron font-extrabold text-xl sm:text-2xl tracking-wider neon-text-primary flex items-center gap-2">
+                    CYBERCALC <span class="text-xs px-2 py-0.5 rounded bg-cyan-950 border border-cyan-500 text-cyan-300 font-mono">v3.09</span>
+                </h1>
+                <p class="text-xs text-gray-400 font-mono tracking-widest uppercase">QUANTUM MATRIX COMPUTATIONAL UNIT</p>
+            </div>
+        </div>
+
+        <!-- Telemetry & Controls -->
+        <div class="flex items-center space-x-4 sm:space-x-6 font-mono text-xs">
+            <div class="hidden md:flex flex-col items-end">
+                <span class="text-gray-400">CORE STATUS: <span class="text-green-400 font-bold animate-pulse">ONLINE</span></span>
+                <span class="text-gray-400">SIM CPU LOAD: <span id="cpu-load-display" class="text-cyan-400">14.2%</span></span>
+            </div>
+
+            <!-- Audio Toggle Button -->
+            <button id="audio-toggle-btn" onclick="toggleAudio()" class="btn-sci-fi px-3 py-1.5 rounded-lg flex items-center gap-2 text-cyan-300">
+                <i id="audio-icon" class="fas fa-volume-high"></i>
+                <span id="audio-status-text" class="hidden sm:inline">SFX: ON</span>
+            </button>
+
+            <!-- Theme Switcher Dropdown -->
+            <div class="flex items-center gap-2">
+                <label for="theme-select" class="text-gray-400 hidden sm:inline"><i class="fas fa-palette"></i></label>
+                <select id="theme-select" onchange="changeTheme(this.value)" class="bg-gray-900 border border-cyan-500/50 rounded-lg text-cyan-300 px-2 py-1.5 text-xs font-mono focus:outline-none focus:border-cyan-400">
+                    <option value="cyber">Cyber Blue</option>
+                    <option value="synthwave">Synth Neon</option>
+                    <option value="matrix">Matrix Code</option>
+                    <option value="quantum">Quantum Gold</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="w-full max-w-6xl z-10 grid grid-cols-1 lg:grid-cols-12 gap-4 my-auto">
+
+        <!-- Navigation Tabs Sidebar / Topbar for Mobile -->
+        <div class="lg:col-span-3 glass-panel rounded-xl p-3 flex flex-row lg:flex-col gap-2 overflow-x-auto">
+            <button onclick="switchTab('calc')" id="tab-btn-calc" class="tab-btn active flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                <i class="fas fa-calculator text-lg"></i>
+                <span class="whitespace-nowrap font-orbitron">CALCULATOR</span>
+            </button>
+            <button onclick="switchTab('converter')" id="tab-btn-converter" class="tab-btn flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-400 hover:text-cyan-300 hover:bg-cyan-500/10">
+                <i class="fas fa-atom text-lg"></i>
+                <span class="whitespace-nowrap font-orbitron">FUTURE CONVERTER</span>
+            </button>
+            <button onclick="switchTab('quantum')" id="tab-btn-quantum" class="tab-btn flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-400 hover:text-cyan-300 hover:bg-cyan-500/10">
+                <i class="fas fa-wave-square text-lg"></i>
+                <span class="whitespace-nowrap font-orbitron">QUANTUM SOLVER</span>
+            </button>
+            <button onclick="switchTab('history')" id="tab-btn-history" class="tab-btn flex-1 lg:flex-none flex items-center justify-center lg:justify-start gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-400 hover:text-cyan-300 hover:bg-cyan-500/10">
+                <i class="fas fa-microchip text-lg"></i>
+                <span class="whitespace-nowrap font-orbitron">TELEMETRY LOG</span>
+            </button>
+        </div>
+
+        <!-- Dynamic Panel Display Area -->
+        <div class="lg:col-span-9 glass-panel rounded-xl p-4 sm:p-6 min-h-[520px] flex flex-col justify-between">
+
+            <!-- TAB 1: SCIENTIFIC CALCULATOR -->
+            <div id="tab-calc" class="tab-content flex-1 flex flex-col justify-between">
+                
+                <!-- Display Terminal -->
+                <div class="relative bg-gray-950/90 border border-cyan-500/40 rounded-xl p-4 mb-4 shadow-inner overflow-hidden font-mono">
+                    <div class="absolute top-2 left-3 text-[10px] text-cyan-500/70 tracking-widest uppercase flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
+                        QUANTUM BUFFER // REGISTER A
+                    </div>
+                    <div id="calc-history-prev" class="text-right text-gray-500 text-xs sm:text-sm h-6 overflow-hidden text-ellipsis whitespace-nowrap pt-3">
+                        <!-- Previous calculation string -->
+                    </div>
+                    <div id="calc-display" class="text-right text-3xl sm:text-4xl font-bold font-orbitron neon-text-primary tracking-wider overflow-x-auto scrollbar-none py-1">
+                        0
+                    </div>
+                </div>
+
+                <!-- Calculator Mode Selector (Standard vs Sci-Fi Advanced) -->
+                <div class="grid grid-cols-2 gap-2 mb-3 font-mono text-xs">
+                    <button onclick="setCalcMode('sci')" id="mode-sci-btn" class="py-1.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">ADVANCED SCI-FI</button>
+                    <button onclick="setCalcMode('std')" id="mode-std-btn" class="py-1.5 rounded text-gray-400 border border-transparent hover:border-gray-700">BASIC CORE</button>
+                </div>
+
+                <!-- Keypad Grid -->
+                <div id="calculator-keypad" class="grid grid-cols-5 gap-1.5 sm:gap-2 text-sm font-orbitron">
+                    <!-- Row 1: Sci-Fi Functions -->
+                    <button onclick="inputFunc('sin')" class="sci-key btn-sci-fi p-2.5 sm:p-3 rounded-lg text-cyan-400">sin</button>
+                    <button onclick="inputFunc('cos')" class="sci-key btn-sci-fi p-2.5 sm:p-3 rounded-lg text-cyan-400">cos</button>
+                    <button onclick="inputFunc('tan')" class="sci-key btn-sci-fi p-2.5 sm:p-3 rounded-lg text-cyan-400">tan</button>
+                    <button onclick="inputConst('c')" class="sci-key btn-sci-fi p-2.5 sm:p-3 rounded-lg text-purple-400" title="Speed of Light (m/s)">c</button>
+                    <button onclick="clearCalc()" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-red-400 bg-red-950/30 border-red-500/40">AC</button>
+
+                    <!-- Row 2: Advanced Functions -->
+                    <button onclick="inputFunc('sqrt')" class="sci-key btn-sci-fi p-2.5 sm:p-3 rounded-lg text-cyan-400">√</button>
+                    <button onclick="inputOperator('^')" class="sci-key btn-sci-fi p-2.5 sm:p-3 rounded-lg text-cyan-400">x^y</button>
+                    <button onclick="inputFunc('log')" class="sci-key btn-sci-fi p-2.5 sm:p-3 rounded-lg text-cyan-400">log</button>
+                    <button onclick="inputConst('h')" class="sci-key btn-sci-fi p-2.5 sm:p-3 rounded-lg text-purple-400" title="Planck's Constant">ℏ</button>
+                    <button onclick="deleteLast()" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-yellow-400"><i class="fas fa-backspace"></i></button>
+
+                    <!-- Row 3 -->
+                    <button onclick="inputConst('pi')" class="sci-key btn-sci-fi p-2.5 sm:p-3 rounded-lg text-purple-400">π</button>
+                    <button onclick="inputNum('7')" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-gray-200">7</button>
+                    <button onclick="inputNum('8')" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-gray-200">8</button>
+                    <button onclick="inputNum('9')" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-gray-200">9</button>
+                    <button onclick="inputOperator('/')" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-cyan-300 font-bold">÷</button>
+
+                    <!-- Row 4 -->
+                    <button onclick="inputConst('e')" class="sci-key btn-sci-fi p-2.5 sm:p-3 rounded-lg text-purple-400">e</button>
+                    <button onclick="inputNum('4')" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-gray-200">4</button>
+                    <button onclick="inputNum('5')" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-gray-200">5</button>
+                    <button onclick="inputNum('6')" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-gray-200">6</button>
+                    <button onclick="inputOperator('*')" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-cyan-300 font-bold">×</button>
+
+                    <!-- Row 5 -->
+                    <button onclick="inputFunc('fact')" class="sci-key btn-sci-fi p-2.5 sm:p-3 rounded-lg text-cyan-400">n!</button>
+                    <button onclick="inputNum('1')" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-gray-200">1</button>
+                    <button onclick="inputNum('2')" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-gray-200">2</button>
+                    <button onclick="inputNum('3')" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-gray-200">3</button>
+                    <button onclick="inputOperator('-')" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-cyan-300 font-bold">-</button>
+
+                    <!-- Row 6 -->
+                    <button onclick="inputOperator('%')" class="sci-key btn-sci-fi p-2.5 sm:p-3 rounded-lg text-cyan-400">%</button>
+                    <button onclick="inputNum('0')" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-gray-200">0</button>
+                    <button onclick="inputNum('.')" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-gray-200">.</button>
+                    <button onclick="calculateResult()" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-cyan-950 font-bold bg-cyan-400 shadow-[0_0_15px_#00f3ff] hover:bg-cyan-300">=</button>
+                    <button onclick="inputOperator('+')" class="btn-sci-fi p-2.5 sm:p-3 rounded-lg text-cyan-300 font-bold">+</button>
+                </div>
+            </div>
+
+            <!-- TAB 2: FUTURE CONVERTER -->
+            <div id="tab-converter" class="tab-content hidden flex-1 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-cyan-500/30 pb-3 mb-4">
+                        <h2 class="font-orbitron text-lg text-cyan-300 flex items-center gap-2">
+                            <i class="fas fa-atom"></i> SCI-FI & FUTURE UNIT MATRIX
+                        </h2>
+                        <span class="text-xs font-mono text-gray-400">RELATIVISTIC & QUANTUM DATA</span>
+                    </div>
+
+                    <!-- Converter Type Selection Buttons -->
+                    <div class="grid grid-cols-3 gap-2 mb-6 font-mono text-xs">
+                        <button onclick="setConverterCategory('time')" id="conv-cat-time" class="conv-cat-btn py-2 px-3 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">Time Dilation</button>
+                        <button onclick="setConverterCategory('data')" id="conv-cat-data" class="conv-cat-btn py-2 px-3 rounded text-gray-400 border border-transparent hover:border-gray-700">Cyber Data & Qubits</button>
+                        <button onclick="setConverterCategory('dist')" id="conv-cat-dist" class="conv-cat-btn py-2 px-3 rounded text-gray-400 border border-transparent hover:border-gray-700">Interstellar Distance</button>
+                    </div>
+
+                    <!-- Converter Form View -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-950/60 p-4 rounded-xl border border-cyan-500/30 font-mono">
+                        <!-- Input Column -->
+                        <div class="flex flex-col gap-3">
+                            <label id="conv-input-label" class="text-xs text-gray-400 uppercase">Input Velocity (% Speed Light c)</label>
+                            <input id="conv-input-val" type="number" value="90" oninput="processConversion()" class="bg-gray-900 border border-cyan-500/50 rounded-lg p-3 text-cyan-300 text-lg font-bold focus:outline-none focus:border-cyan-400">
+                            <select id="conv-unit-from" onchange="processConversion()" class="bg-gray-900 border border-cyan-500/30 rounded p-2 text-sm text-gray-300 focus:outline-none">
+                                <!-- Dynamic options filled by JS -->
+                            </select>
+                        </div>
+
+                        <!-- Output Column -->
+                        <div class="flex flex-col gap-3">
+                            <label id="conv-output-label" class="text-xs text-gray-400 uppercase">Observer Time Factor (Gamma γ)</label>
+                            <div id="conv-output-val" class="bg-gray-900 border border-cyan-500/50 rounded-lg p-3 text-cyan-400 text-xl font-bold font-orbitron overflow-x-auto">
+                                2.294x
+                            </div>
+                            <div id="conv-extra-info" class="text-xs text-cyan-500/80 pt-1 italic">
+                                1 year on ship = 2.29 years for stationary observer.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Graphic Visualizer Card -->
+                <div class="mt-4 bg-cyan-950/20 border border-cyan-500/30 rounded-lg p-3 text-xs font-mono text-cyan-200/80 flex items-center gap-3">
+                    <i class="fas fa-circle-info text-lg text-cyan-400"></i>
+                    <p id="conv-description">
+                        Einstein Special Relativity: Time slows down for objects moving near the speed of light relative to an observer.
+                    </p>
+                </div>
+            </div>
+
+            <!-- TAB 3: QUANTUM SOLVER & EQUATIONS -->
+            <div id="tab-quantum" class="tab-content hidden flex-1 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-cyan-500/30 pb-3 mb-4">
+                        <h2 class="font-orbitron text-lg text-cyan-300 flex items-center gap-2">
+                            <i class="fas fa-wave-square"></i> QUANTUM PROBABILITY & MATRIX
+                        </h2>
+                        <span class="text-xs font-mono text-gray-400">SUPERPOSITION & QUADRATIC</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Module 1: Superposition Generator -->
+                        <div class="bg-gray-950/60 p-4 rounded-xl border border-cyan-500/30 font-mono">
+                            <h3 class="text-sm font-orbitron text-cyan-400 mb-2 flex items-center justify-between">
+                                QUANTUM CHANCE GENERATOR
+                                <i class="fas fa-dice-d20"></i>
+                            </h3>
+                            <p class="text-xs text-gray-400 mb-4">Collapse a quantum qubit state to determine random entropy outcome & spin matrix.</p>
+
+                            <button onclick="collapseQuantumState()" class="w-full btn-sci-fi py-2.5 rounded-lg text-cyan-300 font-bold mb-3 flex items-center justify-center gap-2">
+                                <i class="fas fa-bolt"></i> COLLAPSE WAVEFUNCTION
+                            </button>
+
+                            <div class="space-y-2 text-xs">
+                                <div class="flex justify-between bg-gray-900 p-2 rounded">
+                                    <span class="text-gray-400">QUBIT STATE:</span>
+                                    <span id="q-state-val" class="font-bold text-cyan-300">|Ψ⟩ = 0.707|0⟩ + 0.707|1⟩</span>
+                                </div>
+                                <div class="flex justify-between bg-gray-900 p-2 rounded">
+                                    <span class="text-gray-400">MEASURED SPIN:</span>
+                                    <span id="q-spin-val" class="font-bold text-purple-400">UP (+1/2)</span>
+                                </div>
+                                <div class="flex justify-between bg-gray-900 p-2 rounded">
+                                    <span class="text-gray-400">ENTROPY READOUT:</span>
+                                    <span id="q-entropy-val" class="font-bold text-green-400">0.998 bits</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Module 2: Polynomial Quadratic Solver -->
+                        <div class="bg-gray-950/60 p-4 rounded-xl border border-cyan-500/30 font-mono">
+                            <h3 class="text-sm font-orbitron text-cyan-400 mb-2 flex items-center justify-between">
+                                QUADRATIC SOLVER Matrix
+                                <i class="fas fa-square-root-variable"></i>
+                            </h3>
+                            <p class="text-xs text-gray-400 mb-2">Solve polynomial roots: <span class="text-cyan-300">ax² + bx + c = 0</span></p>
+
+                            <div class="grid grid-cols-3 gap-2 mb-3">
+                                <div>
+                                    <span class="text-[10px] text-gray-400">a</span>
+                                    <input id="quad-a" type="number" value="1" oninput="solveQuadratic()" class="w-full bg-gray-900 border border-cyan-500/40 rounded p-1.5 text-center text-cyan-300 text-xs">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-gray-400">b</span>
+                                    <input id="quad-b" type="number" value="-5" oninput="solveQuadratic()" class="w-full bg-gray-900 border border-cyan-500/40 rounded p-1.5 text-center text-cyan-300 text-xs">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-gray-400">c</span>
+                                    <input id="quad-c" type="number" value="6" oninput="solveQuadratic()" class="w-full bg-gray-900 border border-cyan-500/40 rounded p-1.5 text-center text-cyan-300 text-xs">
+                                </div>
+                            </div>
+
+                            <div class="space-y-1.5 text-xs">
+                                <div class="bg-gray-900 p-2 rounded flex justify-between">
+                                    <span class="text-gray-400">ROOT X1:</span>
+                                    <span id="quad-x1" class="font-bold text-cyan-300">3.00</span>
+                                </div>
+                                <div class="bg-gray-900 p-2 rounded flex justify-between">
+                                    <span class="text-gray-400">ROOT X2:</span>
+                                    <span id="quad-x2" class="font-bold text-cyan-300">2.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: TELEMETRY & HISTORY LOG -->
+            <div id="tab-history" class="tab-content hidden flex-1 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-cyan-500/30 pb-3 mb-4">
+                        <h2 class="font-orbitron text-lg text-cyan-300 flex items-center gap-2">
+                            <i class="fas fa-microchip"></i> HOLOGRAM TELEMETRY LOG
+                        </h2>
+                        <button onclick="clearHistory()" class="text-xs text-red-400 hover:underline font-mono">
+                            <i class="fas fa-trash-can"></i> PURGE LOG
+                        </button>
+                    </div>
+
+                    <!-- Log Table -->
+                    <div class="bg-gray-950/80 rounded-xl border border-cyan-500/30 max-h-[340px] overflow-y-auto p-3 font-mono">
+                        <div class="text-xs text-gray-400 grid grid-cols-12 pb-2 border-b border-gray-800 font-bold uppercase">
+                            <span class="col-span-3">Timestamp</span>
+                            <span class="col-span-5">Expression</span>
+                            <span class="col-span-4 text-right">Result</span>
+                        </div>
+                        <div id="history-log-list" class="divide-y divide-gray-900 text-xs">
+                            <!-- JS populates log records here -->
+                            <div class="py-2 text-center text-gray-600 italic">No quantum computation log entries recorded.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Log Footer Control -->
+                <div class="mt-4 flex justify-between items-center font-mono text-xs">
+                    <span id="log-count-text" class="text-gray-500">ENTRIES: 0</span>
+                    <button onclick="exportHistory()" class="btn-sci-fi px-3 py-1.5 rounded text-cyan-300 flex items-center gap-2">
+                        <i class="fas fa-download"></i> EXPORT TELEMETRY LOG
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-6xl z-10 my-2 text-center text-xs font-mono text-cyan-500/50">
+        CYBERCALC 3000 // QUANTUM SYSTEM INTERFACE // POWERED BY WEB AUDIO API & CANVAS GRAPHICS
+    </footer>
+
+    <script>
+        /* Global State Variables */
+        let currentDisplay = '0';
+        let prevHistoryExpr = '';
+        let calcMode = 'sci'; // 'sci' or 'std'
+        let audioEnabled = true;
+        let audioCtx = null;
+        let historyLogs = [];
+        let currentConverterCat = 'time';
+
+        // Constants Map
+        const SCI_CONSTANTS = {
+            c: 299792458,       // Speed of light m/s
+            h: 6.62607015e-34,  // Planck constant
+            pi: Math.PI,
+            e: Math.E
+        };
+
+        /* Initialize Application */
+        window.onload = function() {
+            initCanvasBg();
+            processConversion();
+            solveQuadratic();
+            simulateCpuLoad();
+        };
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            if (!audioEnabled) return;
+            try {
+                initAudioContext();
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    // Futuristic click beep
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(400, now + 0.05);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'equals') {
+                    // Sci-fi high tech chime
+                    const osc1 = audioCtx.createOscillator();
+                    const osc2 = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+
+                    osc1.type = 'triangle';
+                    osc2.type = 'sine';
+
+                    osc1.frequency.setValueAtTime(523.25, now); // C5
+                    osc1.frequency.exponentialRampToValueAtTime(1046.50, now + 0.15); // C6
+
+                    osc2.frequency.setValueAtTime(659.25, now); // E5
+                    osc2.frequency.exponentialRampToValueAtTime(1318.51, now + 0.15); // E6
+
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+
+                    osc1.connect(gain);
+                    osc2.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc1.start(now);
+                    osc2.start(now);
+                    osc1.stop(now + 0.15);
+                    osc2.stop(now + 0.15);
+                } else if (type === 'quantum') {
+                    // Cyber laser / shock wave
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(1200, now);
+                    osc.frequency.exponentialRampToValueAtTime(100, now + 0.25);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'error') {
+                    // Low error buzz
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.setValueAtTime(110, now + 0.1);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                }
+            } catch (e) {
+                console.error("Audio Web API Error", e);
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const icon = document.getElementById('audio-icon');
+            const text = document.getElementById('audio-status-text');
+
+            if (audioEnabled) {
+                icon.className = 'fas fa-volume-high';
+                text.innerText = 'SFX: ON';
+                playSound('click');
+            } else {
+                icon.className = 'fas fa-volume-xmark text-red-400';
+                text.innerText = 'SFX: OFF';
+            }
+        }
+
+        function changeTheme(theme) {
+            playSound('click');
+            document.body.classList.remove('theme-synthwave', 'theme-matrix', 'theme-quantum');
+            if (theme !== 'cyber') {
+                document.body.classList.add(`theme-${theme}`);
+            }
+        }
+
+        function switchTab(tabId) {
+            playSound('click');
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            // Remove active classes from tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-cyan-500/20', 'text-cyan-300', 'border', 'border-cyan-500/40');
+                btn.classList.add('text-gray-400');
+            });
+
+            // Show current tab
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if (targetTab) targetTab.classList.remove('hidden');
+
+            // Highlight active button
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-cyan-500/20', 'text-cyan-300', 'border', 'border-cyan-500/40');
+                activeBtn.classList.remove('text-gray-400');
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('calc-display').innerText = currentDisplay;
+            document.getElementById('calc-history-prev').innerText = prevHistoryExpr;
+        }
+
+        function inputNum(num) {
+            playSound('click');
+            triggerPulseParticle();
+            if (currentDisplay === '0' || currentDisplay === 'Error') {
+                currentDisplay = num;
+            } else {
+                currentDisplay += num;
+            }
+            updateDisplay();
+        }
+
+        function inputOperator(op) {
+            playSound('click');
+            if (currentDisplay === 'Error') return;
+            const lastChar = currentDisplay.slice(-1);
+            if (['+', '-', '*', '/', '^', '%'].includes(lastChar)) {
+                currentDisplay = currentDisplay.slice(0, -1) + op;
+            } else {
+                currentDisplay += op;
+            }
+            updateDisplay();
+        }
+
+        function inputFunc(funcName) {
+            playSound('click');
+            if (currentDisplay === 'Error') currentDisplay = '';
+            if (currentDisplay === '0') currentDisplay = '';
+            
+            if (funcName === 'sqrt') {
+                currentDisplay += '√(';
+            } else if (funcName === 'sin' || funcName === 'cos' || funcName === 'tan' || funcName === 'log') {
+                currentDisplay += `${funcName}(`;
+            } else if (funcName === 'fact') {
+                currentDisplay += '!';
+            }
+            updateDisplay();
+        }
+
+        function inputConst(symbol) {
+            playSound('click');
+            const val = SCI_CONSTANTS[symbol];
+            if (val !== undefined) {
+                if (currentDisplay === '0' || currentDisplay === 'Error') {
+                    currentDisplay = val.toString();
+                } else {
+                    currentDisplay += val.toString();
+                }
+                updateDisplay();
+            }
+        }
+
+        function clearCalc() {
+            playSound('click');
+            currentDisplay = '0';
+            prevHistoryExpr = '';
+            updateDisplay();
+        }
+
+        function deleteLast() {
+            playSound('click');
+            if (currentDisplay === 'Error' || currentDisplay.length === 1) {
+                currentDisplay = '0';
+            } else {
+                currentDisplay = currentDisplay.slice(0, -1);
+            }
+            updateDisplay();
+        }
+
+        function setCalcMode(mode) {
+            playSound('click');
+            calcMode = mode;
+            const sciKeys = document.querySelectorAll('.sci-key');
+            const sciBtn = document.getElementById('mode-sci-btn');
+            const stdBtn = document.getElementById('mode-std-btn');
+
+            if (mode === 'std') {
+                sciKeys.forEach(k => k.classList.add('invisible'));
+                stdBtn.classList.add('bg-cyan-500/20', 'text-cyan-300', 'border', 'border-cyan-500/40');
+                sciBtn.classList.remove('bg-cyan-500/20', 'text-cyan-300', 'border', 'border-cyan-500/40');
+            } else {
+                sciKeys.forEach(k => k.classList.remove('invisible'));
+                sciBtn.classList.add('bg-cyan-500/20', 'text-cyan-300', 'border', 'border-cyan-500/40');
+                stdBtn.classList.remove('bg-cyan-500/20', 'text-cyan-300', 'border', 'border-cyan-500/40');
+            }
+        }
+
+        function factorial(n) {
+            if (n < 0) return NaN;
+            if (n === 0 || n === 1) return 1;
+            let res = 1;
+            for (let i = 2; i <= n; i++) res *= i;
+            return res;
+        }
+
+        function calculateResult() {
+            try {
+                let expression = currentDisplay;
+                prevHistoryExpr = expression + ' =';
+
+                // Parse Factorials (e.g. 5!)
+                expression = expression.replace(/(\d+)!/g, (match, p1) => {
+                    return factorial(parseInt(p1));
+                });
+
+                // Parse Square Roots (e.g. √(9) or √9)
+                expression = expression.replace(/√\(([^)]+)\)/g, 'Math.sqrt($1)');
+                expression = expression.replace(/√(\d+(\.\d+)?)/g, 'Math.sqrt($1)');
+
+                // Parse Trig & Math
+                expression = expression.replace(/sin\(([^)]+)\)/g, 'Math.sin($1)');
+                expression = expression.replace(/cos\(([^)]+)\)/g, 'Math.cos($1)');
+                expression = expression.replace(/tan\(([^)]+)\)/g, 'Math.tan($1)');
+                expression = expression.replace(/log\(([^)]+)\)/g, 'Math.log10($1)');
+
+                // Parse Exponents (^)
+                expression = expression.replace(/\^/g, '**');
+
+                // Evaluate Expression
+                let result = eval(expression);
+
+                if (typeof result === 'number') {
+                    // Format output precision
+                    if (!Number.isInteger(result)) {
+                        result = parseFloat(result.toFixed(8));
+                    }
+                    playSound('equals');
+                    addLogEntry(currentDisplay, result);
+                    currentDisplay = result.toString();
+                } else {
+                    throw new Error("Invalid Output");
+                }
+            } catch (err) {
+                playSound('error');
+                currentDisplay = 'Error';
+            }
+            updateDisplay();
+        }
+
+        function setConverterCategory(cat) {
+            playSound('click');
+            currentConverterCat = cat;
+
+            // Highlight subtab buttons
+            document.querySelectorAll('.conv-cat-btn').forEach(btn => {
+                btn.classList.remove('bg-cyan-500/20', 'text-cyan-300', 'border', 'border-cyan-500/40');
+                btn.classList.add('text-gray-400');
+            });
+            const active = document.getElementById(`conv-cat-${cat}`);
+            if (active) {
+                active.classList.add('bg-cyan-500/20', 'text-cyan-300', 'border', 'border-cyan-500/40');
+                active.classList.remove('text-gray-400');
+            }
+
+            const inputLabel = document.getElementById('conv-input-label');
+            const outputLabel = document.getElementById('conv-output-label');
+            const unitSelect = document.getElementById('conv-unit-from');
+            const desc = document.getElementById('conv-description');
+            const inputVal = document.getElementById('conv-input-val');
+
+            unitSelect.innerHTML = '';
+
+            if (cat === 'time') {
+                inputLabel.innerText = 'Input Velocity (% Speed Light c)';
+                outputLabel.innerText = 'Observer Time Factor (Gamma γ)';
+                desc.innerText = "Einstein Special Relativity: Time slows down for objects moving near the speed of light relative to an observer.";
+                inputVal.value = "90";
+                
+                const opt = document.createElement('option');
+                opt.value = 'percentage'; opt.innerText = '% of Speed of Light (c)';
+                unitSelect.appendChild(opt);
+            } else if (cat === 'data') {
+                inputLabel.innerText = 'Quantum Data Mass';
+                outputLabel.innerText = 'Equivalent Qubit Superposition Array';
+                desc.innerText = "Cyber Data Matrix: Converts standard digital bytes into quantum information states (Qubits = 2^N state storage capacities).";
+                inputVal.value = "1024";
+
+                const opts = [
+                    { v: 'MB', t: 'Megabytes (MB)' },
+                    { v: 'GB', t: 'Gigabytes (GB)' },
+                    { v: 'TB', t: 'Terabytes (TB)' },
+                    { v: 'PB', t: 'Petabytes (PB)' }
+                ];
+                opts.forEach(o => {
+                    const el = document.createElement('option');
+                    el.value = o.v; el.innerText = o.t;
+                    unitSelect.appendChild(el);
+                });
+            } else if (cat === 'dist') {
+                inputLabel.innerText = 'Deep Space Distance';
+                outputLabel.innerText = 'Converted Deep Universe Units';
+                desc.innerText = "Astronomical Conversion: Converts deep space light years into astronomical units (AU) and Parsecs for star jump calculations.";
+                inputVal.value = "4.24"; // Proxima Centauri
+
+                const opts = [
+                    { v: 'ly', t: 'Light Years' },
+                    { v: 'pc', t: 'Parsecs' },
+                    { v: 'au', t: 'Astronomical Units (AU)' }
+                ];
+                opts.forEach(o => {
+                    const el = document.createElement('option');
+                    el.value = o.v; el.innerText = o.t;
+                    unitSelect.appendChild(el);
+                });
+            }
+
+            processConversion();
+        }
+
+        function processConversion() {
+            const val = parseFloat(document.getElementById('conv-input-val').value) || 0;
+            const outputVal = document.getElementById('conv-output-val');
+            const extraInfo = document.getElementById('conv-extra-info');
+            const unit = document.getElementById('conv-unit-from').value;
+
+            if (currentConverterCat === 'time') {
+                // Relativistic velocity gamma = 1 / sqrt(1 - v^2/c^2)
+                let vRatio = val / 100;
+                if (vRatio >= 1) vRatio = 0.999999; // Cap at near light speed
+                if (vRatio < 0) vRatio = 0;
+
+                const gamma = 1 / Math.sqrt(1 - (vRatio * vRatio));
+                outputVal.innerText = gamma.toFixed(4) + 'x';
+                extraInfo.innerText = `1 year aboard ship = ${gamma.toFixed(2)} years for stationary observer.`;
+            } else if (currentConverterCat === 'data') {
+                // Convert bytes to Qubits equivalent
+                let bytes = val;
+                if (unit === 'MB') bytes *= 1024 * 1024;
+                if (unit === 'GB') bytes *= 1024 * 1024 * 1024;
+                if (unit === 'TB') bytes *= 1024 * 1024 * 1024 * 1024;
+                if (unit === 'PB') bytes *= 1024 * 1024 * 1024 * 1024 * 1024;
+
+                const qubitsNeeded = Math.ceil(Math.log2(bytes * 8 + 1));
+                outputVal.innerText = `${qubitsNeeded} Qubits`;
+                extraInfo.innerText = `Requires ${qubitsNeeded} entangled quantum bits in superposition.`;
+            } else if (currentConverterCat === 'dist') {
+                if (unit === 'ly') {
+                    const parsecs = val * 0.306601;
+                    const au = val * 63241.1;
+                    outputVal.innerText = `${parsecs.toFixed(3)} Parsecs`;
+                    extraInfo.innerText = `Equivalent to ~${au.toLocaleString('en-US', {maximumFractionDigits: 0})} Astronomical Units (AU)`;
+                } else if (unit === 'pc') {
+                    const ly = val / 0.306601;
+                    outputVal.innerText = `${ly.toFixed(3)} Light Yrs`;
+                    extraInfo.innerText = `Distance equals ~${(ly * 9.461e12).toExponential(2)} kilometers.`;
+                } else {
+                    const ly = val / 63241.1;
+                    outputVal.innerText = `${ly.toFixed(5)} Light Yrs`;
+                    extraInfo.innerText = `Distance in light years from Earth.`;
+                }
+            }
+        }
+
+        function collapseQuantumState() {
+            playSound('quantum');
+            triggerPulseParticle();
+
+            const randomVal = Math.random();
+            const spin = randomVal > 0.5 ? "UP (+1/2)" : "DOWN (-1/2)";
+            const alpha = Math.sqrt(randomVal).toFixed(3);
+            const beta = Math.sqrt(1 - randomVal).toFixed(3);
+            const entropy = (- (randomVal * Math.log2(randomVal) + (1 - randomVal) * Math.log2(1 - randomVal))).toFixed(3);
+
+            document.getElementById('q-state-val').innerText = `|Ψ⟩ = ${alpha}|0⟩ + ${beta}|1⟩`;
+            document.getElementById('q-spin-val').innerText = spin;
+            document.getElementById('q-entropy-val').innerText = `${isNaN(entropy) ? 0 : entropy} bits`;
+        }
+
+        function solveQuadratic() {
+            const a = parseFloat(document.getElementById('quad-a').value) || 0;
+            const b = parseFloat(document.getElementById('quad-b').value) || 0;
+            const c = parseFloat(document.getElementById('quad-c').value) || 0;
+
+            const x1El = document.getElementById('quad-x1');
+            const x2El = document.getElementById('quad-x2');
+
+            if (a === 0) {
+                x1El.innerText = "Linear (a=0)";
+                x2El.innerText = b !== 0 ? (-c/b).toFixed(2) : "Undefined";
+                return;
+            }
+
+            const discriminant = b * b - 4 * a * c;
+
+            if (discriminant > 0) {
+                const x1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+                const x2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+                x1El.innerText = x1.toFixed(3);
+                x2El.innerText = x2.toFixed(3);
+            } else if (discriminant === 0) {
+                const x = -b / (2 * a);
+                x1El.innerText = x.toFixed(3);
+                x2El.innerText = "Double Root";
+            } else {
+                const real = (-b / (2 * a)).toFixed(2);
+                const imag = (Math.sqrt(-discriminant) / (2 * a)).toFixed(2);
+                x1El.innerText = `${real} + ${imag}i`;
+                x2El.innerText = `${real} - ${imag}i`;
+            }
+        }
+
+        function addLogEntry(expr, res) {
+            const timestamp = new Date().toLocaleTimeString();
+            historyLogs.unshift({ time: timestamp, expr: expr, res: res });
+            renderHistoryLogs();
+        }
+
+        function renderHistoryLogs() {
+            const container = document.getElementById('history-log-list');
+            const countText = document.getElementById('log-count-text');
+
+            if (historyLogs.length === 0) {
+                container.innerHTML = `<div class="py-2 text-center text-gray-600 italic">No quantum computation log entries recorded.</div>`;
+                countText.innerText = "ENTRIES: 0";
+                return;
+            }
+
+            countText.innerText = `ENTRIES: ${historyLogs.length}`;
+            container.innerHTML = historyLogs.map((item) => `
+                <div class="grid grid-cols-12 py-2 items-center hover:bg-cyan-500/10 transition">
+                    <span class="col-span-3 text-gray-500">${item.time}</span>
+                    <span class="col-span-5 text-cyan-300 font-bold overflow-hidden text-ellipsis">${item.expr}</span>
+                    <span class="col-span-4 text-right text-green-400 font-bold overflow-hidden text-ellipsis">${item.res}</span>
+                </div>
+            `).join('');
+        }
+
+        function clearHistory() {
+            playSound('click');
+            historyLogs = [];
+            renderHistoryLogs();
+        }
+
+        function exportHistory() {
+            playSound('click');
+            if (historyLogs.length === 0) return;
+            const content = historyLogs.map(l => `[${l.time}] ${l.expr} = ${l.res}`).join('\n');
+            
+            // Clipboard Copy Fallback standard
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = content;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            alert("Telemetry log copied to clipboard!");
+        }
+
+        function simulateCpuLoad() {
+            setInterval(() => {
+                const load = (10 + Math.random() * 25).toFixed(1);
+                const display = document.getElementById('cpu-load-display');
+                if (display) display.innerText = `${load}%`;
+            }, 2500);
+        }
+
+        let bgCanvas, bgCtx;
+        let particles = [];
+        let shockwave = null;
+
+        function initCanvasBg() {
+            bgCanvas = document.getElementById('bg-canvas');
+            bgCtx = bgCanvas.getContext('2d');
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Generate floating cyber particles
+            particles = [];
+            for (let i = 0; i < 45; i++) {
+                particles.push({
+                    x: Math.random() * bgCanvas.width,
+                    y: Math.random() * bgCanvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    radius: Math.random() * 2 + 0.5,
+                    alpha: Math.random() * 0.5 + 0.2
+                });
+            }
+
+            requestAnimationFrame(renderCanvasBg);
+        }
+
+        function resizeCanvas() {
+            if (!bgCanvas) return;
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+        }
+
+        function triggerPulseParticle() {
+            shockwave = {
+                x: window.innerWidth / 2,
+                y: window.innerHeight / 2,
+                radius: 10,
+                maxRadius: Math.max(window.innerWidth, window.innerHeight) * 0.6,
+                alpha: 0.6
+            };
+        }
+
+        function renderCanvasBg() {
+            if (!bgCtx) return;
+
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+            // Get computed primary glow color
+            const style = getComputedStyle(document.body);
+            const glowColor = style.getPropertyValue('--primary-glow').trim() || '#00f3ff';
+
+            // Draw floating particles & connection grid
+            for (let i = 0; i < particles.length; i++) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0 || p.x > bgCanvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > bgCanvas.height) p.vy *= -1;
+
+                bgCtx.beginPath();
+                bgCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                bgCtx.fillStyle = glowColor;
+                bgCtx.globalAlpha = p.alpha;
+                bgCtx.fill();
+
+                // Connect nearby particles
+                for (let j = i + 1; j < particles.length; j++) {
+                    let p2 = particles[j];
+                    let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (dist < 120) {
+                        bgCtx.beginPath();
+                        bgCtx.moveTo(p.x, p.y);
+                        bgCtx.lineTo(p2.x, p2.y);
+                        bgCtx.strokeStyle = glowColor;
+                        bgCtx.globalAlpha = (1 - dist / 120) * 0.15;
+                        bgCtx.stroke();
+                    }
+                }
+            }
+
+            // Draw shockwave pulse effect on calculation / state collapse
+            if (shockwave) {
+                bgCtx.beginPath();
+                bgCtx.arc(shockwave.x, shockwave.y, shockwave.radius, 0, Math.PI * 2);
+                bgCtx.strokeStyle = glowColor;
+                bgCtx.lineWidth = 2;
+                bgCtx.globalAlpha = shockwave.alpha;
+                bgCtx.stroke();
+
+                shockwave.radius += 18;
+                shockwave.alpha -= 0.02;
+
+                if (shockwave.alpha <= 0 || shockwave.radius >= shockwave.maxRadius) {
+                    shockwave = null;
+                }
+            }
+
+            bgCtx.globalAlpha = 1.0;
+            requestAnimationFrame(renderCanvasBg);
+        }
+    </script>
+</body>
+</html>
+```
